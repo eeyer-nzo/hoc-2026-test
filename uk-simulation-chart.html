@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simulation Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: white;
+    }
+    canvas {
+      background-color: white;
+      border: 1px solid #ccc;
+      margin-bottom: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Simulation Dashboard</h1>
+
+<h2>Approval Ratings</h2>
+<canvas id="approvalChart" width="800" height="350"></canvas>
+
+<h2>Economic Indicators</h2>
+<canvas id="economicChart" width="800" height="350"></canvas>
+
+<script>
+async function loadCSV(file) {
+  const response = await fetch(file);
+  const text = await response.text();
+  const rows = text.trim().split("\n").map(r => r.split(","));
+  return rows;
+}
+
+// -------- Approval Ratings --------
+loadCSV("approval.csv").then(data => {
+  const headers = data[0];
+  const rows = data.slice(1);
+
+  const labels = rows.map(r => r[0]);
+  const datasets = headers.slice(1).map((h, i) => ({
+    label: h.replace("_", " ").toUpperCase(),
+    data: rows.map(r => r[i + 1] || null),
+    borderWidth: 2,
+    fill: false
+  }));
+
+  new Chart(document.getElementById("approvalChart"), {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      scales: { y: { min: 0, max: 100 } }
+    }
+  });
+});
+
+// -------- Economic Indicators --------
+loadCSV("economy.csv").then(data => {
+  const headers = data[0];
+  const rows = data.slice(1);
+
+  const labels = rows.map(r => r[0]);
+  const datasets = headers.slice(1).map((h, i) => ({
+    label: h.toUpperCase(),
+    data: rows.map(r => r[i + 1]),
+    borderWidth: 2,
+    fill: false
+  }));
+
+  new Chart(document.getElementById("economicChart"), {
+    type: "line",
+    data: { labels, datasets }
+  });
+});
+</script>
+
+</body>
+</html>
